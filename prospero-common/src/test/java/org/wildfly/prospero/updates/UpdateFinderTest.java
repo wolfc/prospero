@@ -30,6 +30,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.AdditionalMatchers.or;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,7 +46,7 @@ public class UpdateFinderTest {
 
     @Test
     public void testDowngradeIsPossible() throws Exception {
-        when(channelSession.findLatestMavenArtifactVersion("org.foo", "bar", "jar", "", null)).thenReturn("1.0.0");
+        when(channelSession.findLatestMavenArtifactVersion(eq("org.foo"), eq("bar"), eq("jar"), eq(""), or(isNull(), anyString()))).thenReturn("1.0.0");
 
         UpdateFinder finder = new UpdateFinder(channelSession, provMgr);
         final List<Artifact> artifacts = Arrays.asList(
@@ -58,7 +62,7 @@ public class UpdateFinderTest {
 
     @Test
     public void testExcludeSameVersion() throws Exception {
-        when(channelSession.findLatestMavenArtifactVersion("org.foo", "bar", "jar", "", null)).thenReturn("1.0.0");
+        when(channelSession.findLatestMavenArtifactVersion(eq("org.foo"), eq("bar"), eq("jar"), eq(""), or(isNull(), anyString()))).thenReturn("1.0.0");
 
         UpdateFinder finder = new UpdateFinder(channelSession, provMgr);
         final List<Artifact> artifacts = Arrays.asList(
@@ -71,7 +75,7 @@ public class UpdateFinderTest {
 
     @Test
     public void testIncludeUpgradeVersion() throws Exception {
-        when(channelSession.findLatestMavenArtifactVersion("org.foo", "bar", "jar", "", null)).thenReturn("1.0.1");
+        when(channelSession.findLatestMavenArtifactVersion(eq("org.foo"), eq("bar"), eq("jar"), eq(""), or(isNull(), anyString()))).thenReturn("1.0.1");
 
         UpdateFinder finder = new UpdateFinder(channelSession, provMgr);
         final List<Artifact> artifacts = Arrays.asList(

@@ -22,9 +22,9 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.jboss.galleon.ProvisioningException;
 import org.jboss.galleon.ProvisioningManager;
 import org.jboss.galleon.layout.ProvisioningPlan;
+import org.jboss.logging.Logger;
 import org.wildfly.channel.ChannelSession;
 import org.wildfly.channel.UnresolvedMavenArtifactException;
-import org.wildfly.prospero.Messages;
 import org.wildfly.prospero.api.ArtifactChange;
 import org.wildfly.prospero.api.exceptions.ArtifactResolutionException;
 
@@ -38,6 +38,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class UpdateFinder implements AutoCloseable {
+    private static final Logger LOGGER = Logger.getLogger(UpdateFinder.class);
 
     public static final int UPDATES_SEARCH_PARALLELISM = 10;
 
@@ -87,16 +88,14 @@ public class UpdateFinder implements AutoCloseable {
     }
 
     private Optional<ArtifactChange> findUpdates(Artifact artifact) throws ArtifactResolutionException {
-        if (artifact == null) {
-            throw Messages.MESSAGES.artifactNotFound(artifact.getGroupId(), artifact.getArtifactId(), null);
-        }
-
         final String latestVersion;
         try {
             latestVersion = channelSession.findLatestMavenArtifactVersion(artifact.getGroupId(),
-                    artifact.getArtifactId(), artifact.getExtension(), artifact.getClassifier(), null);
+                    artifact.getArtifactId(), artifact.getExtension(), artifact.getClassifier(), artifact.getVersion());
         } catch (UnresolvedMavenArtifactException e) {
-            throw Messages.MESSAGES.artifactNotFound(artifact.getGroupId(), artifact.getArtifactId(), e);
+            // TODO: I18N
+            LOGGER.warn(String.format("Artifact [%s:%s] not found", artifact.getGroupId(), artifact.getArtifactId()));
+            return Optional.empty();
         }
         final Artifact latest = new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), artifact.getExtension(), latestVersion);
 
